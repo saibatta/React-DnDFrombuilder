@@ -1,0 +1,102 @@
+
+.HomePage {
+  .grid-container {
+    display: grid;
+    //  grid-template-columns: auto auto auto auto auto auto;
+    gap: 6px;
+    padding: 10px;
+    height: calc(100vh - 65px);
+    grid-template-columns: 30% 70%;
+    grid-template-rows: 100% 100%;
+  }
+  .right-navbar {
+    grid-row: auto;
+    background-color: #2196f3;
+    .list-label{
+      font-size: 20px;
+    font-family: sans-serif;
+    color: white;
+    padding: 0px 20px;
+    font-weight: 800;
+    }
+  }
+  .main-content {
+    grid-row: auto;
+    background-color: #a2a5a8;
+  }
+  .droppable-container {
+    height: calc(100vh - 65px);
+    background: antiquewhite;
+    width: 100%;
+    margin-right: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: white;
+    text-align: center;
+    font-size: 1rem;
+    line-height: normal;
+    float: left;
+    // background-color: rgb(34, 34, 34);
+  }
+  .component-container {
+    margin: 20px;
+    padding: 20px;
+    background-color: #aaa358;
+  }
+  .side-navbar-list{
+    border: 1px dashed white;
+    background-color: #2196f3;
+    padding: 0.5rem 1rem;
+    margin-right: 1.5rem;
+    margin: 1.5rem;
+    cursor: move;
+    /* float: left; */
+    opacity: 1;
+    border-radius: 22px;
+    color: white;
+    font-size: 20px;
+    font-family: sans-serif;
+  }
+  .dropped-field-content{
+    border-radius: 10px;
+    border: 1px dashed gray;
+    padding: 0.5rem 1rem;
+    margin: 3rem 2rem;
+    background-color: white;
+    cursor: move;
+    color: red;
+    opacity: 1;
+    .control-label{
+      float: left;
+      font-family: sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      Color: black;
+      padding: 10px 1px;
+    }
+    .card-options{
+      float: right;
+      padding: 12px 4px;
+      border: 1px dotted black;
+      border-radius: 14px;
+      /* margin-bottom: 17px; */
+      background: white;
+      transform: rotate(-90deg);
+      margin-top: -94px;
+      float: right;
+      margin-right: 76px;
+    color:black;
+    background: #f7f7f7;
+    cursor: pointer;
+    .icon-poistion{
+      transform: rotate(90deg);
+      margin: 0px;
+    padding: 10px;
+   
+    }
+    :hover{
+      color:cadetblue;
+      background-color: #aaaaaa
+    }
+    }
+  }
+}

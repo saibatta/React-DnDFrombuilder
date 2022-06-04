@@ -1,15 +1,16 @@
-import { Button } from "react-bootstrap";
 import React, { useRef, useState } from "react";
 import { useDrag, useDrop } from "react-dnd";
 import Form from "react-jsonschema-form";
 import { BsArrowsMove, BsSubtract, BsPencil, BsTrash } from "react-icons/bs";
 import EditModal from "./EditModal";
-export const Card = ({ id, text, index, moveCard, field }) => {
-	const { schema, uiSchema, editSchema, formData } = field;
-	const [isFormEditActive, setFormEditFlag] = useState(false);
-	const [isFormSubmitActive, setFormSubmitActiveFlag] = useState(false);
+import { useDispatch } from "react-redux";
+import { deleteField, copyField, updateFormData } from "../Store/ToolkitSlicer/fieldSlice";
+
+export const Card = ({ id, text, index, moveCard, fieldContent }) => {
+	const [field, setFiled] = useState(fieldContent.field)
+
 	const [modalShow, setModalShow] = React.useState(false);
-	console.log(field, " :**** Name****", text);
+	const dispatch = useDispatch()
 	const ref = useRef(null);
 	const [{ handlerId }, drop] = useDrop({
 		accept: "drop-fields",
@@ -69,38 +70,51 @@ export const Card = ({ id, text, index, moveCard, field }) => {
 	drag(drop(ref));
 
 	// Form
-	const onFormSubmit = (data) => {
-		console.log("***onFormSubmit**", data);
-	};
 	const handleOnChange = (data) => {
-		console.log("***handleOnChange**", data);
-		setFormSubmitActiveFlag(true);
-	};
-	const onEditSubmit = (data) => {
-		// setModalShow(false);
-		// setFormEditFlag(false);
-		console.log("onEditSubmit", data);
-		if (data && data.formData) {
-			for (const [key, value] of Object.entries(data.formData)) {
-				if (key in field.schema) {
-					field.schema[key] = value;
-				}
-			}
-			console.log(field.schema);
-			field.formData = data?.formData?.description;
-			//	setFormEditFlag(!isFormEditActive);
-			console.log(field);
+		let prevField = JSON.parse(JSON.stringify(field));
+		if (typeof data.formData === "string") {
+			prevField.formData = data.formData;
+			dispatch(updateFormData({ id, formData: { title: data.schema.title, description: prevField.formData } }))
+			setFiled(prevField);
+		}
+		if (typeof data.formData == 'object' && !!Object.keys(data.formData).length) {
+			prevField.formData = data.formData;
+			dispatch(updateFormData({ id, formData: prevField.formData }))
+			setFiled(prevField);
 		}
 	};
+	const onEditSubmit = (data) => {
+		let prevField = JSON.parse(JSON.stringify(field));
+		if (data && data?.formData) {
+			for (const [key, value] of Object.entries(data.formData)) {
+				if (key in prevField?.schema) {
+					prevField.schema[key] = value;
+				}
+				if (prevField?.editSchema?.properties && key in prevField?.editSchema?.properties) {
+					prevField.editSchema.properties[key] = { ...prevField.editSchema.properties[key], title: value };
+				}
+				if (prevField?.schema?.properties && key in prevField?.schema?.properties) {
+					prevField.schema.properties[key] = { ...prevField.schema.properties[key], title: data?.formData[key + '_label'] };
+				}
+			}
+			prevField.editSchema = data.schema
+			let singleField = data?.formData?.description;
+			prevField.formData = singleField ? singleField : data.formData;
+			setModalShow(false);
+		}
+		setFiled(prevField);
+	};
 	const onCardOptionsSelection = (options) => {
-		console.log(options);
 		switch (options) {
 			case "edit":
-				setFormEditFlag(!isFormEditActive);
 				setModalShow(true);
 				break;
 			case "delete":
-				//	setFormEditFlag(!isFormEditActive);
+				dispatch(deleteField(id))
+				break;
+			case "copy":
+				let copyItem = { id: Date.now(), field };
+				dispatch(copyField(copyItem))
 				break;
 			default:
 				break;
@@ -108,11 +122,8 @@ export const Card = ({ id, text, index, moveCard, field }) => {
 	};
 	return (
 		<React.Fragment>
-			{isFormEditActive && (
-				// <Form schema={editSchema} onSubmit={(data) => onEditSubmit(data)}>
-				// 	<button variant="outline-primary">Submit</button>
-				// </Form>
-				<EditModal editSchema={editSchema} onSubmit={(data) => onEditSubmit(data)} show={modalShow} onHide={() => setModalShow(false)} />
+			{modalShow && (
+				<EditModal id={id} editSchema={field?.editSchema} schema={field?.schema} formData={field?.formData} onSubmitData={onEditSubmit} show={modalShow} onHide={() => setModalShow(false)} />
 			)}
 
 			<div ref={ref} className="dropped-field-content" style={{ opacity }} data-handler-id={handlerId}>
@@ -130,14 +141,9 @@ export const Card = ({ id, text, index, moveCard, field }) => {
 						<BsTrash />
 					</p>
 				</span>
-				<Form schema={schema} uiSchema={uiSchema} formData={formData} onSubmit={onFormSubmit} onChange={handleOnChange}>
-					<button type="submit" disabled={!isFormSubmitActive} className="btn btn-info pull-right">
-						On Form Submit
-					</button>
+				<Form schema={field?.schema} uiSchema={field?.uiSchema} formData={field?.formData} onSubmit={onEditSubmit} onChange={handleOnChange}>
+					<button className="hide-submit-button" type="submit" />
 				</Form>
-				{/* <button type="submit" className="btn btn-info pull-right" onClick={() => setFormEditFlag(!isFormEditActive)}>
-					On Form Edit
-				</button> */}
 			</div>
 		</React.Fragment>
 	);
